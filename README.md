@@ -5,6 +5,7 @@ Be sure you have the [SPEDAS framework installed]([url](http://spedas.org/wiki/i
 
 Once you have the SPEDAS folder installed, download [elf_getspec_ratio_kc.pro]([url](https://github.com/kchen3490/elf-getspec-ratio/blob/main/elf_getspec_ratio_kc.pro)) and open it with your favorite IDE or text editor.
 
+
 At the top, you will see some variables to hardcode in. They are as such:
 
 localdir = '/'			; directory to store spectrogram plots
@@ -20,6 +21,7 @@ direction = 'south'		; 'north' for north-descending or 'south' for south-ascendi
 tstart=['2022-07-18/00:00:00']	; time to start investigation in format 'YYYY-MM-DD/hh:mm:ss'
 
 tend = ['2022-07-19/00:00:00']	; time to end investigation in format 'YYYY-MM-DD/hh:mm:ss'
+
 
 To avoid running into errors (because some times will not have the data you wish to observe), download the [data_availability files]([url](https://data.elfin.ucla.edu/ela/data_availability/)) in directories '/ela' or '/elb' (depending on the probe) to understand which specific times have data as well as the direction of each specific time.
 
