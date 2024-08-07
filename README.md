@@ -8,8 +8,7 @@ Be sure you have the SPEDAS framework installed (spedas.org/wiki/index.php?title
 Once you have the SPEDAS folder installed, download **elf_getspec_ratio_kc.pro** (github.com/kchen3490/elf-getspec-ratio/blob/main/elf_getspec_ratio_kc.pro) and open it with your favorite IDE or text editor.
 
 At the top, you will see some variables to hardcode in. They are as such:
-![image](https://github.com/user-attachments/assets/000776e3-7e2c-46dc-824f-df478efab0bc)
-
+![image](https://github.com/user-attachments/assets/a08853ad-b7fd-48ee-8fdd-49ea6169246a)
 
 To avoid running into errors (because some times will not have the data you wish to observe), download the data_availability files (data.elfin.ucla.edu/ela/data_availability/) in directories '/ela' or '/elb' (depending on the probe) to understand which specific times have data as well as the direction of each specific time.
 
