@@ -4,39 +4,54 @@
 ; 		ratio of precipitating / perpendicular, as well as change in magnetic latitude
 ; 		as a function of universial time (UT).
 ; 
-; ORIGINAL BY: Colin Wilkins (colinwilkins@ucla.edu) - 2024-06-12 (YYYY-MM-DD)
+; ORIGINAL EXAMPLE PROVIDED BY: Colin Wilkins (colinwilkins@ucla.edu) - 2024-06-12 (YYYY-MM-DD)
 ; 
 ; AUTHORS: Kai Chen, Drs. Mei-Ching Fok, Suk-Bin Kang, and Cristian Ferradas from NASA GSFC
 ; CONTRIBUTORS: Colin Wilkins, Anton Artemyev, and Dr. Vassilis Angeolopoulos from UCLA's ELFIN team
 ; STARTED: 2024-06-17
-; ENDED: TBD
+; ENDED: 2024-08-07
 
 pro elf_getspec_ratio_kc
 
 	elf_init
-	;!elf.local_data_dir='D:\docs\data\elfin_data\'
+	
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	; Look at data_availability from /ela or /ela online to determine these values
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-	; the following are the presets to investigate available data for the geomagnetic storm between 2022-07-18 and 2022-07-20
-	yourdir = '/data/share/elfin/'		; directory to store spectrogram plots
+	localdir = '/'							; directory to store spectrogram plots
+	probe = 'a'								; 'a' for ELFIN-A or 'b' for ELFIN-B, aka ELFIN-STAR
+	myspecies = 'e'							; 'e' for electron or 'i' for ion
+	mydatatype = 'pef'						; 'pef' for electron or 'pif' for ion (change this also on lines 133-134, 138-139)
+	direction = 'south'						; 'north' for north-descending or 'south' for south-ascending
+	tstart=['2022-07-18/00:00:00']			; time to start investigation in format 'YYYY-MM-DD/hh:mm:ss'
+	tend = ['2022-07-19/00:00:00']			; time to end investigation in format 'YYYY-MM-DD/hh:mm:ss'
 
-	; both ELFIN-A&B ions and ELFIN-A electron
+
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	; Investigation examples of the 2022-07-18 to 2022-07-20 geomagnetic storm
+	; ....uncomment/comment out each section at a time....
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+	;localdir = '/data/share/elfin/'
+
+	; both ELFIN-A&B ions and ELFIN-A electron 24hr plots
 	;probe='a'			; 'a' for ELFIN-A probe or 'b' for ELFIN-B (ELFIN-STAR) probe
 	;myspecies='i'		; 'i' for ion or 'e' for electron
 	;mydatatype='pif'		; 'pif' for ion or 'pef' for electron ; be sure to also change when calling elf_load_epd and elf_getspec
 	;;direction is not needed
-	;direction = 'south'
-	;tstart=['2022-07-18/11:29:57']
-	;tend=['2022-07-18/11:35:58']
+	;tstart=['2022-07-18/00:00:00','2022-07-19/00:00:00','2022-07-20/00:00:00']
+	;tend=['2022-07-19/00:00:00','2022-07-20/00:00:00','2022-07-21/00:00:00']
 
-	; only for ELFIN-B electron
-	probe='b'
-	myspecies='e'
-	mydatatype='pef'
-	;direction is not needed
-	tstart=['2022-07-19/00:00:00','2022-07-20/00:00:00']
-	tend=['2022-07-20/00:00:00','2022-07-21/00:00:00']
+	; only for ELFIN-B electron 24hr plots
+	;probe='b'
+	;myspecies='e'
+	;mydatatype='pef'
+	;;direction is not needed
+	;tstart=['2022-07-19/00:00:00','2022-07-20/00:00:00']
+	;tend=['2022-07-20/00:00:00','2022-07-21/00:00:00']
 
-	; ELFIN-A specific times (electron and ion are the same) (got times from ela_epdi_all.csv and ela_epde_all.csv) (all of them are south)
+	; ELFIN-A specific times (electron and ion are the same) (got times from ela_epdi_all.csv and ela_epde_all.csv) (all of them point south)
 	;probe='a'
 	;myspecies='i'
 	;mydatatype='pif'		; be sure to also change when calling elf_load_epd and elf_getspec
@@ -56,7 +71,7 @@ pro elf_getspec_ratio_kc
 	;		'2022-07-19/13:28:20', $
 	;		'2022-07-20/06:17:23']
 
-	; ELFIN-B specific times for electrons (all of them are south)
+	; ELFIN-B specific times for electrons (all of them point south)
 	;probe='b'
 	;myspecies='e'
 	;mydatatype='pef'		; be sure to also change when calling elf_load_epd and elf_getspec
@@ -97,13 +112,15 @@ pro elf_getspec_ratio_kc
 	tstart_size = size(tstart)
 	tend_size = size(tend)
 	IF(tstart_size[3] NE tend_size[3]) THEN BEGIN
-		stop			; stop if tstart and tend are not the same length
+		stop			; stop if we don't have equal number of times in tstart and tend
 	ENDIF
 
+	; For-loop automates plotting multiple spectrograms
 	FOR k=0, tstart_size[3]-1 DO BEGIN
 
-		; Contribution by CW START
-		; Contribution by CW START
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		; Colin's contribution from elf_getspec_example_cw.pro
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		time2plot=[tstart[k],tend[k]]
 		timeduration=time_double(tend[k])-time_double(tstart[k])
 		timespan,tstart[k],timeduration,/seconds
@@ -113,18 +130,19 @@ pro elf_getspec_ratio_kc
 		elf_load_state,probe=probe,trange=time2plot
 
 		; loads pef/pif data
-		elf_load_epd,probe=probe,datatype='pef',type = 'raw',trange=time2plot
-		elf_getspec,probe=probe,datatype='pef',type = 'raw',fullspin=fullspin,/get3Dspec ; this simply acts on the data loaded previously
+		elf_load_epd,probe=probe,datatype='pif',type = 'raw',trange=time2plot
+		elf_getspec,probe=probe,datatype='pif',type = 'raw',fullspin=fullspin,/get3Dspec ; this simply acts on the data loaded previously
 
 		; reload data in eflux units now (two calls: first reload data, then recompute spectra)
-		elf_load_epd,probe=probe,datatype='pef',type = mytype,trange=time2plot
-		elf_getspec,probe=probe,datatype='pef',type = mytype,fullspin=fullspin,/get3Dspec ; this simply acts on the data loaded previously
-		; Contribution by CW END
-		; Contribution by CW END
+		elf_load_epd,probe=probe,datatype='pif',type = mytype,trange=time2plot
+		elf_getspec,probe=probe,datatype='pif',type = mytype,fullspin=fullspin,/get3Dspec ; this simply acts on the data loaded previously
 
-		; COPY PASTA START
-		; COPY PASTA START
-		; COPY PASTA FROM spedas/projects/elfin/plots/epde_plot_overviews.pro
+
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		; COPYPASTA FROM spedas/projects/elfin/plots/epde_plot_overviews.pro
+		; COPYPASTA to get position data
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 		  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		  ; Get position data
 		  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -243,7 +261,6 @@ pro elf_getspec_ratio_kc
 		  get_data, 'elx_pos_sm_mins_foot', data=sm_mins
 		  store_data,'el'+probe+'_MLT_igrf',data={x: datgsm.x, y: interp(MLT0, sm_mins.x, datgsm.x)}
 		  del_data, '*_mins'
-		  ; charsize option was here
 		  options,'el'+probe+'_L_igrf',ytitle='L-igrf'
 		  ; charsize option was here
 		  options,'el'+probe+'_MLAT_igrf',ytitle='MLAT-igrf'
@@ -251,19 +268,18 @@ pro elf_getspec_ratio_kc
 		  options,'el'+probe+'_MLT_igrf',ytitle='MLT-igrf'
 		  ; charsize option was here
 
-		  ;	EDIT HERE
-		  ; EDIT HERE
-		  ; adjusting charsize based on 24hr plot or time-specific plot - KC
-		  IF(timeduration EQ 86400) THEN BEGIN
-			;day plot
+		  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		  ; EDIT by KC
+		  ; adjusting charsize based on 24hr plot or time-specific plot
+		  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		  IF(timeduration EQ 86400) THEN BEGIN	; 24hr day plot
 			options,'el'+probe+'_MLT_dip',charsize=1.0
 			options,'el'+probe+'_L_dip',charsize=1.0
 			options,'el'+probe+'_MLAT_dip',charsize=1.0
 			options,'el'+probe+'_L_igrf',charsize=1.0
 			options,'el'+probe+'_MLAT_igrf',charsize=1.0
 			options,'el'+probe+'_MLT_igrf',charsize=1.0
-		  ENDIF ELSE BEGIN
-			;time-specific plot
+		  ENDIF ELSE BEGIN						; time-specific plot
 			options,'el'+probe+'_MLT_dip',charsize=1.25
 			options,'el'+probe+'_L_dip',charsize=1.25
 			options,'el'+probe+'_MLAT_dip',charsize=1.25
@@ -271,8 +287,6 @@ pro elf_getspec_ratio_kc
 			options,'el'+probe+'_MLAT_igrf',charsize=1.25
 			options,'el'+probe+'_MLT_igrf',charsize=1.25
 		  ENDELSE
-		  ; EDIT END
-		  ; EDIT END
 
 		  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		  ; ... shadow/sunlight bar 0 (shadow) or 1 (sunlight)
@@ -290,11 +304,11 @@ pro elf_getspec_ratio_kc
 		  options, 'sunlight_bar', 'ystyle',4
 		  options, 'sunlight_bar', 'xstyle',4
 		  options, 'sunlight_bar', yrange=[-0.1,0.1]
-		; COPY PASTA END
-		; COPY PASTA END
 
 
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		; CREATING TPLOTS
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 		; get data from anti, para, and perp tplots
 		prefix = 'el' + probe + '_' + mydatatype + '_en_spec2plot_'
@@ -302,11 +316,11 @@ pro elf_getspec_ratio_kc
 		anti_plot = prefix + 'anti'
 		para_plot = prefix + 'para'
 		perp_plot = prefix + 'perp'
-		get_data, anti_plot, data = anti_data		; anti_plot is the tplot while anti_data is the data
+		get_data, anti_plot, data = anti_data		; anti_plot is the tplot var while anti_data is the data
 		get_data, para_plot, data = para_data
 		get_data, perp_plot, data = perp_data
 
-		; check that dimensions of all ?_data.y arrays are the same and store them
+		; check if sizes of ?_data.y arrays are equal and store them
 		anti_size = size(anti_data.y)
 		para_size = size(para_data.y)
 		perp_size = size(perp_data.y)
@@ -315,6 +329,7 @@ pro elf_getspec_ratio_kc
 		ENDIF
 
 		IF(timeduration EQ 86400) THEN BEGIN		; if 24hr plot
+			
 			; create anti_and_para tplot
 			antiandpara = fltarr(para_size[1], para_size[2])
 			antiandpara[*] = !Values.F_NAN
@@ -324,6 +339,7 @@ pro elf_getspec_ratio_kc
 				ENDFOR
 			ENDFOR
 			
+			; store anti_and_para data
 			store_data, prefix + 'anti_and_para', data = {x:para_data.x, y:antiandpara, v:para_data.v}
 			anti_and_para_plot = prefix + 'anti_and_para'
 			get_data, anti_and_para_plot, data = anti_and_para_data
@@ -332,7 +348,7 @@ pro elf_getspec_ratio_kc
 			ylim, anti_and_para_plot, 50, 5e3, 1
 			zlim, anti_and_para_plot, 1e4, 1e9, 1		; 1e4 means 1 x 10^4
 			
-			; calculate ratio iff anti_and_para and perp are both non-zero
+			; calculate ratio iff data from anti_and_para and perp are both non-zero
 			ratio_data = fltarr(para_size[1], para_size[2])
 			ratio_data[*] = !Values.F_NAN					; gives all values in ratio 2D-array a NAN value
 			anti_and_para_size = size(antiandpara)
@@ -347,7 +363,9 @@ pro elf_getspec_ratio_kc
 			; create new ratio tplot
 			store_data, prefix + 'anti+para_ovr_perd', data = {x:anti_and_para_data.x, y:ratio_data, v:anti_and_para_data.v}
 			ratio_plot = prefix + 'anti+para_ovr_perd'
+			
 		ENDIF ELSE BEGIN							; if time-specific plot
+			
 			; create new prec tplot
 			IF(STRCMP(direction, 'north') EQ 1) THEN BEGIN
 				store_data, prefix + 'prec', data = {x:para_data.x, y:para_data.y, v:para_data.v}	; PARA_DATA (if north descending)
@@ -362,12 +380,12 @@ pro elf_getspec_ratio_kc
 			zlim, prec_plot, 1e4, 1e9, 1		; 1e4 means 1 x 10^4
 
 			; calculate ratio iff prec and perp are both non-zero
-			ratio_data = fltarr(para_size[1], para_size[2])	; doesn't matter, para_size and anti_size are the same
-			ratio_data[*] = !Values.F_NAN					; gives all values in ratio 2D-array a NAN value
+			ratio_data = fltarr(para_size[1], para_size[2])	; I use para_size since para_size and anti_size are equal
+			ratio_data[*] = !Values.F_NAN					; gives all values in ratio_data 2D-array a NAN value
 			prec_size = size(prec_data.y)
 			FOR i=0, prec_size[1]-1 DO BEGIN
 				FOR j=0, prec_size[2]-1 DO BEGIN
-					IF((prec_data.y[i,j] NE 0) || (perp_data.y[i,j] NE 0)) THEN BEGIN	; if not the dividing value is not zero, put it into ratio
+					IF((prec_data.y[i,j] NE 0) || (perp_data.y[i,j] NE 0)) THEN BEGIN	; if neither value is zero, calculate ratio
 						ratio_data[i,j] = prec_data.y[i,j] / perp_data.y[i,j]
 					ENDIF
 			  	ENDFOR
@@ -376,6 +394,7 @@ pro elf_getspec_ratio_kc
 			; create new ratio tplot
 			store_data, prefix + 'prec_ovr_perd', data = {x:prec_data.x, y:ratio_data, v:prec_data.v}
 			ratio_plot = prefix + 'prec_ovr_perd'
+			
 		ENDELSE
 
 		; scaling z and y axis for ratio_plot
@@ -387,25 +406,25 @@ pro elf_getspec_ratio_kc
 		options, omni_plot, 'ztitle','nflux'
 		options, perp_plot, 'ztitle','nflux'
 		IF(timeduration EQ 86400) THEN BEGIN
-			options, anti_and_para_plot, 'ztitle','nflux'
+			options, anti_and_para_plot, 'ztitle','eflux'
 		ENDIF ELSE BEGIN
-			options, prec_plot, 'ztitle','nflux'
+			options, prec_plot, 'ztitle','eflux'
 		ENDELSE
 		options, ratio_plot, ztitle='ratio'
 
 
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		; DISPLAYING TPLOTS AND PNGing THEM
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 		; tplot_options affect global settings
 		tplot_options, 'xmargin', [18,11]		; set left/right marjins to 18 and 11 characters, respectively
 		tplot_options, 'ymargin', [4, 4]		; set bottom/top margins to 4 and 4 lines, respectively
 
 		date = tstart[k].Substring(0,9)
-		IF(timeduration EQ 86400) THEN BEGIN
-			;day plot title
+		IF(timeduration EQ 86400) THEN BEGIN	; 24hr day plot title
 			mytitle='PRELIMINARY ELFIN-'+strupcase(probe)+' EPD-'+strupcase(myspecies)+', alt='+strmid(strtrim(alt,1),0,3)+'km, ' + date + ', 24hrs'
-		ENDIF ELSE BEGIN
-			;time-specific title
+		ENDIF ELSE BEGIN						; time-specific title
 			mytitle='PRELIMINARY ELFIN-'+strupcase(probe)+' EPD-'+strupcase(myspecies)+', alt='+strmid(strtrim(alt,1),0,3)+'km, ' + date + ', ' +  tstart[k].Substring(11,15)+' to '+tend[k].Substring(11,15) + ', '
 			IF(STRCMP(direction, 'north') EQ 1) THEN BEGIN
 				mytitle = mytitle + 'North Descending'
@@ -413,7 +432,8 @@ pro elf_getspec_ratio_kc
 				mytitle = mytitle + 'South Ascending'
 			ENDELSE
 		ENDELSE
-
+		
+		; plotting position based on probe
 		if strlowcase(probe) eq 'a' then  $
 			varstring=['ela_GLON','ela_MLAT_igrf[ela_MLAT_dip]', 'ela_MLT_igrf[ela_MLT_dip]', 'ela_L_igrf[ela_L_dip]'] else $
 			varstring=['elb_GLON','elb_MLAT_igrf[elb_MLAT_dip]', 'elb_MLT_igrf[elb_MLT_dip]', 'elb_L_igrf[elb_L_dip]']
@@ -438,53 +458,59 @@ pro elf_getspec_ratio_kc
 				var_label = varstring
 		ENDELSE
 
-		; check if directory exists
-		dir = yourdir+prefix.Substring(0,2)+'/overplots/'+tstart[k].Substring(0,3)+'/'	; e.g., ...elfin/ela/overplots/2022/
+		; checks if directory exists and creates them if nonexistant
+		dir = localdir+prefix.Substring(0,2)+'/overplots/'+tstart[k].Substring(0,3)+'/'	; e.g., ...elfin/ela/overplots/2022/
 		result = FILE_TEST(dir, /DIRECTORY)	; make year directory if it doesn't exist
 
 		IF(result EQ 0) THEN BEGIN			; 1 means directory exists, 0 means it does not exist
 			FILE_MKDIR, dir					; makes directory
 		ENDIF
+
 		dir = dir+tstart[k].Substring(5,6)+'/'
 		result = FILE_TEST(dir, /DIRECTORY)
 		IF(result EQ 0) THEN BEGIN
-			FILE_MKDIR, dir					; make month directory if it doesn't exist
+			FILE_MKDIR, dir					; make month directory if it doesn't exist	
 		ENDIF
+
 		dir = dir+tstart[k].Substring(8,9)+'/'
 		result = FILE_TEST(dir, /DIRECTORY)
 		IF(result EQ 0) THEN BEGIN
 			FILE_MKDIR, dir					; make day directory if it doesn't exist
 		ENDIF
 
-		;day plot or time-specific plot
-		IF(timeduration EQ 86400) THEN BEGIN
-			;day plot
+		; 24hr day plot or time-specific plot
+		IF(timeduration EQ 86400) THEN BEGIN	; 24hr day plot
 			makepng, dir + 'el' + probe + '_epd' + myspecies + '_scizone_specplots_' + date
-		ENDIF ELSE BEGIN
-			;time-specific plot
+			
+		ENDIF ELSE BEGIN						; time-specific plot
 			time_specific = tstart[k].Substring(11,15)
 			makepng, dir + 'el' + probe + '_epd' + myspecies + '_scizone_specplots_' + date + '_' + time_specific
+			
 		ENDELSE
 
-	; Writing SM position data onto ASCII file
-	get_data, 'el'+probe+'_pos_sm', data=state_pos_sm
-	IF(timeduration EQ 86400) THEN BEGIN
-		;day data file
-		OPENW, 1, FILEPATH('pos_sm_'+date+'.dat', ROOT_DIR=dir)
-	ENDIF ELSE BEGIN
-		;time-specific data file
-		OPENW, 1, FILEPATH('pos_sm_'+date+'_'+tstart[k].Substring(11,15)+'.dat', ROOT_DIR=dir)
-	ENDELSE
-	
-	limit = size(state_pos_sm.x)	; size yields [dimensions,num_of_rows,type_code,num_of_elements]
-									; x = time in seconds, y[*,0] = x-coords, y[*,1] = y-coords, y[*,2] = z-coords
-	FOR count=0, limit[3]-1 DO BEGIN
-		; columns are time as a float, x, y, and z SM coordinates
-		state_pos_sm_time = time_string(state_pos_sm.x[count])
-		PRINTF, 1, state_pos_sm_time, state_pos_sm.y[count,0], state_pos_sm.y[count,1], state_pos_sm.y[count,2]
-	ENDFOR
 
-	CLOSE, 1
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		; Writing SM position data onto ASCII file
+		; provided to compare with CIMI model by Dr. Mei-Ching and her team
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+		get_data, 'el'+probe+'_pos_sm', data=state_pos_sm
+		IF(timeduration EQ 86400) THEN BEGIN	; 24-hr day data file
+			OPENW, 1, FILEPATH('pos_sm_'+date+'.dat', ROOT_DIR=dir)
+			
+		ENDIF ELSE BEGIN						; time-specific data file
+			OPENW, 1, FILEPATH('pos_sm_'+date+'_'+tstart[k].Substring(11,15)+'.dat', ROOT_DIR=dir)
+			
+		ENDELSE
+		
+		limit = size(state_pos_sm.x)		; x = time in seconds since unix epoch, y[*,0] = x-coords, y[*,1] = y-coords, y[*,2] = z-coords
+											
+		FOR count=0, limit[3]-1 DO BEGIN	; columns are time as a float, x, y, and z SM coordinates
+			state_pos_sm_time = time_string(state_pos_sm.x[count])	; time_string() converts double-time values to readable strings
+			PRINTF, 1, state_pos_sm_time, state_pos_sm.y[count,0], state_pos_sm.y[count,1], state_pos_sm.y[count,2]
+		ENDFOR
+
+		CLOSE, 1
 
 	ENDFOR
 end
