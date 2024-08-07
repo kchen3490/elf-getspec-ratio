@@ -8,11 +8,17 @@ Once you have the SPEDAS folder installed, download [elf_getspec_ratio_kc.pro]([
 At the top, you will see some variables to hardcode in. They are as such:
 
 localdir = '/'			; directory to store spectrogram plots
+
 probe = 'a'			; 'a' for ELFIN-A or 'b' for ELFIN-B, aka ELFIN-STAR
-myspecies = 'e'			; 'e' for electron or 'i' for ion\
+
+myspecies = 'e'			; 'e' for electron or 'i' for ion
+
 datatype = 'pef'		; 'pef' for electron or 'pif' for ion (change this also on lines 133-134, 138-139)
+
 direction = 'south'		; 'north' for north-descending or 'south' for south-ascending
+
 tstart=['2022-07-18/00:00:00']	; time to start investigation in format 'YYYY-MM-DD/hh:mm:ss'
+
 tend = ['2022-07-19/00:00:00']	; time to end investigation in format 'YYYY-MM-DD/hh:mm:ss'
 
 To avoid running into errors (because some times will not have the data you wish to observe), download the [data_availability files]([url](https://data.elfin.ucla.edu/ela/data_availability/)) in directories '/ela' or '/elb' (depending on the probe) to understand which specific times have data as well as the direction of each specific time.
