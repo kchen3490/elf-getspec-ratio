@@ -1,7 +1,7 @@
 # elf-getspec-ratio routine
 
 ### How to use 🤔
-This IDL routine produces energy-time spectrograms, specifically a ratio of precipitating over perpendicular, from the ELFIN mission.
+This single-use utility program/IDL routine produces energy-time spectrograms, specifically a ratio of precipitating over perpendicular, from the ELFIN mission.
 
 Be sure you have the [SPEDAS framework](https://spedas.org/wiki/index.php?title=Downloads_and_Installation) installed before attempting to run this routine.
 
