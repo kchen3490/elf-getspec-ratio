@@ -9,6 +9,7 @@ Once you have the SPEDAS folder installed, download **[elf_getspec_ratio_kc.pro]
 
 At the top, you will see some variables to hardcode in. They are as such:
 ![image](https://github.com/user-attachments/assets/a08853ad-b7fd-48ee-8fdd-49ea6169246a)
+(direction is not always accurate since I mistakenly put down only north descending or south ascending options)
 
 To avoid running into errors (because some times will not have the data you wish to observe), download the [data_availability files](https://data.elfin.ucla.edu/ela/data_availability/) in directories '/ela' or '/elb' (depending on the probe) to understand which specific times have data as well as the direction of each specific time.
 
