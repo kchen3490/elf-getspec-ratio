@@ -23,8 +23,8 @@ Dr. Burcu Kosar and Laura Schmidt
 
 
 Jessy Nguyen and Michael Marrs
-  from NASA Goddard Space Flight Center's Heliophysics division for solving technology issues during my 10-week summer program.
+  from NASA Goddard Space Flight Center's Heliophysics division as system administrators for solving technology issues during my 10-week summer program.
 
 
 Dr. Michael Croteau and The GSFC Transform to Open Science ([TOPS]([url](https://nasa.github.io/Transform-to-Open-Science/))) Champions 2024 team 
-  for inspiring me to pursue open science practices and attempting to make this routine available for the public.
+  for inspiring me to pursue open science practices and attempt to make this routine available for the public.
