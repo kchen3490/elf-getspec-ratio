@@ -1,6 +1,6 @@
 ; GOAL: Produce energy-time spectrograms of the energy-flux for electrons and ions 
 ; 		and their omni-directional flux, perpendicular flux, precipitating flux (i.e.,
-; 		parallel if north-descending or antiparallel if south-ascending), and 
+; 		parallel if direction faces north or antiparallel if direction faces south), and 
 ; 		ratio of precipitating / perpendicular, as well as change in magnetic latitude
 ; 		as a function of universial time (UT).
 ; 
@@ -16,14 +16,14 @@ pro elf_getspec_ratio_kc
 	elf_init
 	
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	; Look at data_availability from /ela or /ela online to determine these values
+	; Look at data_availability from /ela or /elb online to determine these values
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-	localdir = '/'							; directory to store spectrogram plots
-	probe = 'a'								; 'a' for ELFIN-A or 'b' for ELFIN-B, aka ELFIN-STAR
-	myspecies = 'e'							; 'e' for electron or 'i' for ion
-	mydatatype = 'pef'						; 'pef' for electron or 'pif' for ion (change this also on lines 133-134, 138-139)
-	direction = 'south'						; 'north' for north-descending or 'south' for south-ascending
+	localdir = '/'					; directory to store spectrogram plots
+	probe = 'a'					; 'a' for ELFIN-A or 'b' for ELFIN-B, aka ELFIN-STAR
+	myspecies = 'e'					; 'e' for electron or 'i' for ion
+	mydatatype = 'pef'				; 'pef' for electron or 'pif' for ion (change this also on lines 133-134, 137-138)
+	direction = 'South-Descending'			; CHECK el?_epd?_all.csv to determine if 'Descending' or 'Ascending'
 	tstart=['2022-07-18/00:00:00']			; time to start investigation in format 'YYYY-MM-DD/hh:mm:ss'
 	tend = ['2022-07-19/00:00:00']			; time to end investigation in format 'YYYY-MM-DD/hh:mm:ss'
 
@@ -37,7 +37,7 @@ pro elf_getspec_ratio_kc
 
 	; both ELFIN-A&B ions and ELFIN-A electron 24hr plots
 	;probe='a'			; 'a' for ELFIN-A probe or 'b' for ELFIN-B (ELFIN-STAR) probe
-	;myspecies='i'		; 'i' for ion or 'e' for electron
+	;myspecies='i'			; 'i' for ion or 'e' for electron
 	;mydatatype='pif'		; 'pif' for ion or 'pef' for electron ; be sure to also change when calling elf_load_epd and elf_getspec
 	;;direction is not needed
 	;tstart=['2022-07-18/00:00:00','2022-07-19/00:00:00','2022-07-20/00:00:00']
@@ -272,7 +272,7 @@ pro elf_getspec_ratio_kc
 		  ; EDIT by KC
 		  ; adjusting charsize based on 24hr plot or time-specific plot
 		  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-		  IF(timeduration EQ 86400) THEN BEGIN	; 24hr day plot
+		  IF(timeduration EQ 86400) THEN BEGIN				; 24hr day plot
 			options,'el'+probe+'_MLT_dip',charsize=1.0
 			options,'el'+probe+'_L_dip',charsize=1.0
 			options,'el'+probe+'_MLAT_dip',charsize=1.0
@@ -364,13 +364,13 @@ pro elf_getspec_ratio_kc
 			store_data, prefix + 'anti+para_ovr_perd', data = {x:anti_and_para_data.x, y:ratio_data, v:anti_and_para_data.v}
 			ratio_plot = prefix + 'anti+para_ovr_perd'
 			
-		ENDIF ELSE BEGIN							; if time-specific plot
+		ENDIF ELSE BEGIN				; if time-specific plot
 			
 			; create new prec tplot
 			IF(STRCMP(direction, 'north') EQ 1) THEN BEGIN
-				store_data, prefix + 'prec', data = {x:para_data.x, y:para_data.y, v:para_data.v}	; PARA_DATA (if north descending)
+				store_data, prefix + 'prec', data = {x:para_data.x, y:para_data.y, v:para_data.v}	; PARA_DATA (if north direction)
 			ENDIF ELSE BEGIN
-				store_data, prefix + 'prec', data = {x:anti_data.x, y:anti_data.y, v:anti_data.v}	; ANTI_DATA (if south ascending)
+				store_data, prefix + 'prec', data = {x:anti_data.x, y:anti_data.y, v:anti_data.v}	; ANTI_DATA (if south direction)
 			ENDELSE
 			prec_plot = prefix + 'prec'			; used for tplot and get_data
 			get_data, prec_plot, data = prec_data
@@ -424,13 +424,14 @@ pro elf_getspec_ratio_kc
 		date = tstart[k].Substring(0,9)
 		IF(timeduration EQ 86400) THEN BEGIN	; 24hr day plot title
 			mytitle='PRELIMINARY ELFIN-'+strupcase(probe)+' EPD-'+strupcase(myspecies)+', alt='+strmid(strtrim(alt,1),0,3)+'km, ' + date + ', 24hrs'
-		ENDIF ELSE BEGIN						; time-specific title
-			mytitle='PRELIMINARY ELFIN-'+strupcase(probe)+' EPD-'+strupcase(myspecies)+', alt='+strmid(strtrim(alt,1),0,3)+'km, ' + date + ', ' +  tstart[k].Substring(11,15)+' to '+tend[k].Substring(11,15) + ', '
-			IF(STRCMP(direction, 'north') EQ 1) THEN BEGIN
-				mytitle = mytitle + 'North Descending'
-			ENDIF ELSE BEGIN
-				mytitle = mytitle + 'South Ascending'
-			ENDELSE
+   			
+		ENDIF ELSE BEGIN			; time-specific title
+			mytitle='PRELIMINARY ELFIN-'+strupcase(probe)+' EPD-'+strupcase(myspecies)+', alt='+strmid(strtrim(alt,1),0,3)+'km, ' + date + ', ' +  tstart[k].Substring(11,15)+' to '+tend[k].Substring(11,15) + ', ' + direction
+   			;IF(STRCMP(direction, 'north') EQ 1) THEN BEGIN
+			;	mytitle = mytitle + 'North'		; CHECK el?_epd?_all.csv to determine if 'North Descending' or 'North Ascending'
+			;ENDIF ELSE BEGIN
+			;	mytitle = mytitle + 'South'		; CHECK el?_epd?_all.csv to determine if 'South Descending' or 'South Ascending'
+			;ENDELSE
 		ENDELSE
 		
 		; plotting position based on probe
@@ -460,29 +461,29 @@ pro elf_getspec_ratio_kc
 
 		; checks if directory exists and creates them if nonexistant
 		dir = localdir+prefix.Substring(0,2)+'/overplots/'+tstart[k].Substring(0,3)+'/'	; e.g., ...elfin/ela/overplots/2022/
-		result = FILE_TEST(dir, /DIRECTORY)	; make year directory if it doesn't exist
+		result = FILE_TEST(dir, /DIRECTORY)		; make year directory if it doesn't exist
 
 		IF(result EQ 0) THEN BEGIN			; 1 means directory exists, 0 means it does not exist
-			FILE_MKDIR, dir					; makes directory
+			FILE_MKDIR, dir				; makes directory
 		ENDIF
 
 		dir = dir+tstart[k].Substring(5,6)+'/'
 		result = FILE_TEST(dir, /DIRECTORY)
 		IF(result EQ 0) THEN BEGIN
-			FILE_MKDIR, dir					; make month directory if it doesn't exist	
+			FILE_MKDIR, dir				; make month directory if it doesn't exist	
 		ENDIF
 
 		dir = dir+tstart[k].Substring(8,9)+'/'
 		result = FILE_TEST(dir, /DIRECTORY)
 		IF(result EQ 0) THEN BEGIN
-			FILE_MKDIR, dir					; make day directory if it doesn't exist
+			FILE_MKDIR, dir				; make day directory if it doesn't exist
 		ENDIF
 
 		; 24hr day plot or time-specific plot
 		IF(timeduration EQ 86400) THEN BEGIN	; 24hr day plot
 			makepng, dir + 'el' + probe + '_epd' + myspecies + '_scizone_specplots_' + date
 			
-		ENDIF ELSE BEGIN						; time-specific plot
+		ENDIF ELSE BEGIN			; time-specific plot
 			time_specific = tstart[k].Substring(11,15)
 			makepng, dir + 'el' + probe + '_epd' + myspecies + '_scizone_specplots_' + date + '_' + time_specific
 			
@@ -498,7 +499,7 @@ pro elf_getspec_ratio_kc
 		IF(timeduration EQ 86400) THEN BEGIN	; 24-hr day data file
 			OPENW, 1, FILEPATH('pos_sm_'+date+'.dat', ROOT_DIR=dir)
 			
-		ENDIF ELSE BEGIN						; time-specific data file
+		ENDIF ELSE BEGIN			; time-specific data file
 			OPENW, 1, FILEPATH('pos_sm_'+date+'_'+tstart[k].Substring(11,15)+'.dat', ROOT_DIR=dir)
 			
 		ENDELSE
